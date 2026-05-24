@@ -1,0 +1,6 @@
+{
+  "name": "Love OS — Her Edition",
+  "description": "An interactive, cinematic scrolling experience with soft animations, blooming hearts, and a beautiful romantic storyline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom transitions and glow styles */
+.text-glow-pink {
+  text-shadow: 0 0 12px rgba(244, 63, 94, 0.4), 0 0 24px rgba(244, 63, 94, 0.2);
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 12px rgba(234, 179, 8, 0.4), 0 0 24px rgba(234, 179, 8, 0.2);
+}
+
+.box-glow-pink {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.15), inset 0 0 12px rgba(244, 63, 94, 0.1);
+}
+
+.box-glow-gold {
+  box-shadow: 0 0 25px rgba(234, 179, 8, 0.15), inset 0 0 15px rgba(234, 179, 8, 0.1);
+}
+
+/* Smooth custom scroll bar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(20, 10, 15, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 63, 94, 0.25);
+  border-radius: 9999px;
+  border: 2px solid rgba(20, 10, 15, 1);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.5);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #0c050a; /* Artistic Flair Deep Near-Black Charcoal Rose */
+  color: #fce7f3; /* pink-50 style */
+  scroll-behavior: smooth;
+}
