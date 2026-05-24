@@ -146,33 +146,6 @@ export default function App() {
     }
   }, [bootStep, showGate]);
 
-  // Autoplay cinematic advance timer
-  useEffect(() => {
-    if (!autoplay || showGate) return;
-
-    const timer = setInterval(() => {
-      setSecRemaining((prev) => {
-        if (prev <= 1) {
-          // Time to advance!
-          setAutoplayIndex((currentIndex) => {
-            const nextIndex = (currentIndex + 1) % sectionsList.length;
-            const nextSectionId = sectionsList[nextIndex];
-            
-            // Unique slow cinematic transition
-            triggerAutoplayTransition(nextSectionId, nextIndex);
-            
-            return nextIndex;
-          });
-          // Reset countdown timer
-          return 15;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [autoplay, showGate, autoplayIndex]);
-
   // Track scroll position to update right-hand OS segment list
   useEffect(() => {
     if (showGate) return;
@@ -252,14 +225,12 @@ export default function App() {
     if (idx !== -1) {
       triggerAutoplayTransition(id, idx);
       setAutoplayIndex(idx);
+      setAutoplay(false);
+      setSecRemaining(0);
       if (id === "final-message") {
-        setAutoplay(false); // Stop autoplay
-        setSecRemaining(0);
         setIsFinalDecrypting(false);
         setDecryptProgress(0);
         setIsDecrypted(false);
-      } else {
-        setSecRemaining(15); // Reset count-down
       }
     } else {
       const el = document.getElementById(id);
@@ -272,10 +243,10 @@ export default function App() {
 
   const handleGatePassed = () => {
     setShowGate(false);
-    // Automatically turn on Autoplay Cinema Mode so things fade/scroll organically
-    setAutoplay(true);
+    // Manual deck mode by default
+    setAutoplay(false);
     setAutoplayIndex(0);
-    setSecRemaining(15);
+    setSecRemaining(0);
     // Release a celebratory firework!
     setTimeout(() => {
       handleTriggerFireworks();
@@ -288,7 +259,7 @@ export default function App() {
     setShowGate(true);
     setAutoplay(false);
     setAutoplayIndex(0);
-    setSecRemaining(15);
+    setSecRemaining(0);
     setBootStep(0);
     setBootComplete(false);
     setActiveSegment("boot");
@@ -599,7 +570,7 @@ export default function App() {
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </button>
                   <span className="text-[10px] text-zinc-500 animate-pulse">
-                    (system transitions automatically)
+                    (click to proceed manually)
                   </span>
                 </motion.div>
               )}
@@ -607,7 +578,7 @@ export default function App() {
           </div>
 
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center text-zinc-650 text-[10px] font-mono gap-1 animate-pulse">
-            <span>AUTOMATIC FLOW ACTIVE</span>
+            <span>MANUAL FLOW PROTOCOL LOGGED</span>
             <ChevronDown className="w-3.5 h-3.5" />
           </div>
         </section>
@@ -1028,62 +999,78 @@ export default function App() {
         </div>
       </footer>
 
-      {/* 5. Clean, Professional Cinema Mode Controller overlay */}
+      {/* 5. Clean, Professional Manual Slide Deck Controller overlay */}
       {!showGate && (
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-black/80 border border-purple-500/30 backdrop-blur-md rounded-full px-5 py-3 flex items-center gap-4 shadow-2xl"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-black/90 border border-pink-500/30 backdrop-blur-md rounded-full px-5 py-3 flex items-center justify-between gap-6 shadow-2xl min-w-[280px] sm:min-w-[420px]"
         >
-          <div className="flex items-center gap-2">
-            <Tv className="w-4 h-4 text-purple-400 animate-pulse" />
-            <span className="font-mono text-[9px] uppercase tracking-widest text-[#f43f5e] font-bold">
-              CINEMA_AUTOPLAY
-            </span>
+          {/* Information & Indicator */}
+          <div className="flex items-center gap-2.5">
+            <Heart className="w-4 h-4 text-pink-400 animate-pulse fill-pink-500/20" />
+            <div className="flex flex-col text-left">
+              <span className="font-mono text-[9px] uppercase tracking-widest text-[#f43f5e] font-bold leading-none">
+                Story Deck
+              </span>
+              <span className="font-mono text-[8px] text-zinc-400 uppercase mt-0.5">
+                Part {sectionsList.indexOf(activeSegment) + 1} of {sectionsList.length}
+              </span>
+            </div>
           </div>
 
-          <div className="h-4 w-[1px] bg-zinc-800" />
+          <div className="h-5 w-[1px] bg-zinc-800" />
 
-          {/* Timer status or indicator with romantic context */}
-          <span className="font-mono text-[9px] min-w-[155px]">
+          {/* Current Slide context/status indicator */}
+          <div className="font-mono text-[9px] hidden md:inline-block max-w-[140px] truncate text-zinc-400">
             {activeSegment === "final-message" ? (
               isFinalDecrypting && decryptProgress < 100 ? (
-                <span className="text-pink-400 animate-pulse">DECRYPTING NOTE... ({decryptProgress}%)</span>
+                <span className="text-pink-400 animate-pulse">DECRYPTING...({decryptProgress}%)</span>
+              ) : isDecrypted ? (
+                <span className="text-pink-300 font-bold">DECRYPTED</span>
               ) : (
-                <span className="text-pink-300 font-bold tracking-tight">STANDBY: READY FOR INFINITE LOVE</span>
+                <span className="text-zinc-500 font-bold">LOCKED_NOTE</span>
               )
-            ) : autoplay ? (
-              <span className="text-zinc-400">STATUS: FLOWING ({secRemaining}s)</span>
             ) : (
-              <span className="text-zinc-500">STATUS: FLOW PAUSED</span>
+              `SLIDE::${activeSegment.toUpperCase().replace(/-/g, "_")}`
             )}
-          </span>
+          </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
+            {/* Back Button */}
             <button
+              disabled={sectionsList.indexOf(activeSegment) === 0}
               onClick={() => {
-                setAutoplay(!autoplay);
-                handleSpawnHearts(5);
+                const currentIdx = sectionsList.indexOf(activeSegment);
+                if (currentIdx > 0) {
+                  handleScrollToSection(sectionsList[currentIdx - 1]);
+                }
               }}
-              className="p-1.5 hover:bg-white/10 rounded-full text-zinc-350 hover:text-white transition-all cursor-pointer flex items-center justify-center"
-              title={autoplay ? "Pause Autoplay" : "Resume Autoplay"}
+              className={`px-3 py-1.5 font-mono text-[9px] uppercase tracking-wider rounded-md transition-all ${
+                sectionsList.indexOf(activeSegment) === 0
+                  ? "text-zinc-700 bg-transparent cursor-not-allowed opacity-30"
+                  : "text-zinc-300 bg-white/[0.04] hover:bg-white/[0.1] active:scale-95 cursor-pointer"
+              }`}
             >
-              {autoplay ? (
-                <Pause className="w-3.5 h-3.5" />
-              ) : (
-                <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-              )}
+              Back
             </button>
-            
+
+            {/* Next Button */}
             <button
+              disabled={sectionsList.indexOf(activeSegment) === sectionsList.length - 1}
               onClick={() => {
-                // Force skip to next segment
-                const nextIdx = (autoplayIndex + 1) % sectionsList.length;
-                handleScrollToSection(sectionsList[nextIdx]);
+                const currentIdx = sectionsList.indexOf(activeSegment);
+                if (currentIdx < sectionsList.length - 1) {
+                  handleScrollToSection(sectionsList[currentIdx + 1]);
+                }
               }}
-              className="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-mono text-[9px] uppercase tracking-wider rounded-md cursor-pointer transition-all"
+              className={`px-3 py-1.5 font-mono text-[9px] uppercase tracking-wider rounded-md font-bold transition-all ${
+                sectionsList.indexOf(activeSegment) === sectionsList.length - 1
+                  ? "text-zinc-700 bg-transparent cursor-not-allowed opacity-30"
+                  : "bg-gradient-to-r from-pink-500/25 to-rose-500/25 hover:from-pink-500/40 hover:to-rose-500/40 text-pink-300 hover:text-white border border-pink-500/20 active:scale-95 cursor-pointer"
+              }`}
             >
-              Skip
+              Next
             </button>
           </div>
         </motion.div>
